@@ -1,124 +1,127 @@
 <?php
-include_once 'CrudController.php';
-$crudcontroller = new CrudController();
-$result = $crudcontroller->readData();
+session_start();
+require './controllers/CURDCLass.php';
+$crud = new CRUD();
+
 ?>
+<!DOCTYPE html>
+<html lang="en">
 
-<html>
 <head>
-<title>CRUD</title>
-<link rel="stylesheet"
-    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script
-    src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<link rel="stylesheet" type="text/css" href="styles.css">
-<script src="crudEvent.js"></script>
-
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./public/css/main.css">
+    <title>Document</title>
 </head>
+
 <body>
+    <a class="add_section" href="category.process.php?do=add">
+        <ion-icon class='add-icon' name="add-circle-outline"></ion-icon>
+    </a>
+   
+        
+            <div class="ycenter-xbetween">
+                <h2 style="word-break: break-all;">
+                   catogries
+                </h2>
+                <h2 style="text-algin:center;postion:absolute;left:20%">
+                Country
+                </h2>
+                <h2 style="text-algin:center;postion:absolute;left:20%">
+                Action
+                 </h2>
+              
+            </div>
 
-    <div class="row">
-        <a href="add.php"><button class="btn btn-primary btn-add">Add New Record</button></a>
-    </div>
+      
+   
+    <?php
+    $sql = $crud->selectAll('catogries');
 
-    <div class="row" id="container">
-    <?php require_once "list.php" ?>
-    </div>
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog"
-        aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close"
-                        data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="frmEdit">
-                        <div class="form-group">
-                            <div class="row">
-                                <label>Title</label> <input type="text"
-                                    name="title" id="title"
-                                    class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="row">
-                                <label>Description</label>
-                                <textarea class="form-control"
-                                    id="description"
-                                    name="description"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="row">
-                                <label>URL</label> <input type="text"
-                                    name="url" id="url"
-                                    class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="row">
-                                <label>Category</label> <input
-                                    type="text" name="category"
-                                    id="category"
-                                    class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="row">
-                                <input type="text" name="id"
-                                    id="id" class="form-control"
-                                    hidden="true">
-                            </div>
-                        </div>
+    $sql->execute();
+    $rows = $sql->fetchAll();
+    $_SESSION['categories'] = $rows;
+    foreach ($rows as $key => $row) {
+    ?>
 
 
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                        data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary"
-                        id="update">Save changes</button>
+    <div class="card">
+        <div class=" ">
+            <div class="ycenter-xbetween">
+                <h2 style="word-break: break-all;">
+                    <?php
+                        echo $row['category_name'];
+
+                        ?>
+                </h2>
+                <h2 style="word-break: break-all;">
+                    <?php
+                        echo $row['category_country'];
+                        
+                        ?>
+                </h2>
+                <div class="actions">
+                    <a href="category.process.php?do=edit&categoryid= <?php echo $key ?>">
+                        <ion-icon class="edit-icon" name="create-outline"></ion-icon>
+                    </a>
+                    <a class="delete-icon"
+                        href='category.process.php?do=delete&cateid= <?php echo $row['id']; ?>'>
+                        <ion-icon name="close-circle-outline"></ion-icon>
+                    </a>
                 </div>
             </div>
-        </div>
-    </div>
-    <!-- Modal ends here -->
 
-    <!-- Modal for message-->
-    <div class="modal fade" id="messageModal" tabindex="-1"
-        role="dialog" data-backdrop="static"
-        aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Message</h5>
-                    <button type="button" class="close"
-                        data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h4 class="text-center" id="msg"></h4>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                        data-dismiss="modal">Close</button>
-                </div>
-            </div>
         </div>
     </div>
-    <!-- Modal ends here -->
+    <?php
+    }
+
+    if (isset($_SESSION['model']) && $_SESSION['model'] == 'show_edit_cate') {
+        $cate = isset($_GET['key']) ? $_SESSION['categories'][$_GET['key']] : '';
+
+    ?>
+
+    <div class="controll_section">
+        <h2>Edit this category</h2>
+        <form class="form" action="category.process.php?do=update" method='post' enctype="multipart/form-data">
+            <input type="hidden" hidden name='cateid' value=<?php
+                                                                echo $cate['id'];
+                                                                ?> />
+            <label for="title">Category Title</label>
+            <input class='input' type="title" name="title" value=<?php
+                                                                        echo $cate['category_name']
+                                                                        ?> />
+            <input class='input' type="title" name="count" value=<?php
+                                                                        echo $cate['category_country']
+                                                                        ?> />
+
+            <button class='btn' type="submit">Edit</button>
+        </form>
+    </div>
+    <?php
+
+    }
+    if (isset($_SESSION['model']) && $_SESSION['model'] == 'show_cate') {
+        $cate = isset($_GET['key']) ? $_SESSION['categories'][$_GET['key']] : '';
+
+    ?>
+
+    <div class="controll_section">
+        <h2>Edit this category</h2>
+        <form class="form" action="category.process.php?do=inset" method='post' enctype="multipart/form-data">
+
+            <label for="title">Category Title</label>
+            <input class='input' type="title" name="title" placeholder="Enter new cate" />
+            <input class='input' type="title" name="count" placeholder="Enter new cate" />
+            <button class='btn' type="submit">Edit</button>
+        </form>
+    </div>
+    <?php
+
+    }
+    ?>
+    <script src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>
 </body>
+
 </html>
